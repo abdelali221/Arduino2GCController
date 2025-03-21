@@ -27,15 +27,7 @@ void setup() {
 }
 
 void loop() {
-  
-  GamecubeConsole1.write(d);
-   if (!GamecubeConsole1.write(GamecubeController1))
-    {
-      Serial.println(F("Error writing Gamecube controller."));
-      digitalWrite(pinLed, HIGH);
-      delay(1000);
-    }
-  
+
   d.report.a = 0;
   d.report.b = 0;
   d.report.x = 0;
@@ -50,5 +42,13 @@ void loop() {
   d.report.ddown = 1;
   d.report.xAxis = 128;
   d.report.yAxis = 128;
-
+  
+  GamecubeConsole1.write(d);
+   if (!GamecubeConsole1.write(GamecubeController1))
+    {
+      Serial.println(F("Error writing Gamecube controller."));
+      digitalWrite(pinLed, HIGH);
+      delay(1000);
+    }
+  
 }
