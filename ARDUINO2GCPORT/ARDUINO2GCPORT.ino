@@ -21,7 +21,6 @@ int lastButtonStartState;
 unsigned long timer;
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
   Serial.print("Pressing the D-PAD buttons down...");
 }
