@@ -1,53 +1,98 @@
 #include <Nintendo.h>
 
-#define pinLed LED_BUILTIN
+CGamecubeConsole GamecubeConsole(5);
+Gamecube_Data_t d = defaultGamecubeData
 
-CGamecubeConsole GamecubeConsole1(5);
-CGamecubeController GamecubeController1(7);
-Gamecube_Data_t d = defaultGamecubeData;
+char chr;
 
-int buttonAstate;
-int buttonBstate;
-int buttonUpState;
-int buttonDownState;
-int buttonStartState;
-
-int lastButtonAstate;
-int lastButtonBstate;
-int lastButtonUpState;
-int lastButtonDownState;
-int lastButtonStartState;
-
-unsigned long timer;
-
+bool ok = false;
 void setup() {
   Serial.begin(9600);
-  Serial.print("Pressing the D-PAD buttons down...");
 }
 
 void loop() {
+  if (Serial.available()) {
+    chr = Serial.read();
+  }
 
-  d.report.a = 0;
-  d.report.b = 0;
-  d.report.x = 0;
-  d.report.y = 0;
-  d.report.z = 0;
-  d.report.start = 0;
-  d.report.r = 0;
-  d.report.l = 0;
-  d.report.dleft = 1;
-  d.report.dright = 1;
-  d.report.dup = 1;
-  d.report.ddown = 1;
+  switch (chr) {
+    case 'A':
+      d.report.a = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'B':
+      d.report.b = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'X':
+      d.report.x = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'Y':
+      d.report.y = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'Z':
+      d.report.z = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'S':
+      d.report.start = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'R':
+      d.report.r = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'L':
+      d.report.l = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'l':
+      d.report.dleft = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'r':
+      d.report.dright = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'u':
+      d.report.dup = HIGH;
+      Serial.println(chr);
+    break;
+
+    case 'd':
+      d.report.ddown = HIGH;
+      Serial.println(chr);
+    break;
+  }
+  GamecubeConsole.write(d);
+  ResetController();
+}
+
+void ResetController() {
+  d.report.a = LOW;
+  d.report.b = LOW;
+  d.report.x = LOW;
+  d.report.y = LOW;
+  d.report.z = LOW;
+  d.report.start = LOW;
+  d.report.r = LOW;
+  d.report.l = LOW;
+  d.report.dleft = LOW;
+  d.report.dright = LOW;
+  d.report.dup = LOW;
+  d.report.ddown = LOW;
   d.report.xAxis = 128;
   d.report.yAxis = 128;
-  
-  GamecubeConsole1.write(d);
-   if (!GamecubeConsole1.write(GamecubeController1))
-    {
-      Serial.println(F("Error writing Gamecube controller."));
-      digitalWrite(pinLed, HIGH);
-      delay(1000);
-    }
-  
 }
