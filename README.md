@@ -8,7 +8,8 @@ As long as you respect the wiring it should work with no problems.
 
 Simply upload the program to your Arduino (IT SHOULD BE A 16MHZ BOARD), then follow the diagram :
 
-https://github.com/abdelali221/Arduino2GCController/blob/main/Diagram.png
+![1000021764](https://github.com/user-attachments/assets/2130ac80-dab6-4b1a-94c7-81eebd7b8165)
+
 
 # Control mapping : 
 
