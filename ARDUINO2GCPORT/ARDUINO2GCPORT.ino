@@ -1,98 +1,132 @@
 #include <Nintendo.h>
+#include <ArduinoVT.h>
 
-CGamecubeConsole GamecubeConsole(5);
-Gamecube_Data_t d = defaultGamecubeData
-
+Term Term;
 char chr;
+bool ReadInput = true;
+#define pinLed LED_BUILTIN
+CGamecubeConsole GamecubeController1(6);
+CGamecubeConsole GamecubeConsole1(5);
+Gamecube_Data_t d = defaultGamecubeData;
 
-bool ok = false;
 void setup() {
+  // put your setup code here, to run once:
   Serial.begin(9600);
+  Term.Clear();
+  pinMode(pinLed, OUTPUT);
+  Serial.print("Arduino GC Controller Emulator");
+  delay(1000);
+  digitalWrite(pinLed, HIGH);
 }
 
 void loop() {
-  if (Serial.available()) {
+  if (Serial.available() && ReadInput) {
     chr = Serial.read();
   }
-
+  
   switch (chr) {
-    case 'A':
-      d.report.a = HIGH;
-      Serial.println(chr);
+    case ' ':
+      d.report.start = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("Start is being pressed     ");
+    break;
+    
+    case 'z':
+      d.report.dup = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("D-PAD U is being pressed");
     break;
 
-    case 'B':
-      d.report.b = HIGH;
-      Serial.println(chr);
+    case 's':
+      d.report.ddown = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("D-PAD D is being pressed");
     break;
 
-    case 'X':
-      d.report.x = HIGH;
-      Serial.println(chr);
-    break;
-
-    case 'Y':
-      d.report.y = HIGH;
-      Serial.println(chr);
-    break;
-
-    case 'Z':
-      d.report.z = HIGH;
-      Serial.println(chr);
-    break;
-
-    case 'S':
-      d.report.start = HIGH;
-      Serial.println(chr);
-    break;
-
-    case 'R':
-      d.report.r = HIGH;
-      Serial.println(chr);
-    break;
-
-    case 'L':
-      d.report.l = HIGH;
-      Serial.println(chr);
-    break;
-
-    case 'l':
-      d.report.dleft = HIGH;
-      Serial.println(chr);
-    break;
-
-    case 'r':
-      d.report.dright = HIGH;
-      Serial.println(chr);
-    break;
-
-    case 'u':
-      d.report.dup = HIGH;
-      Serial.println(chr);
+    case 'q':
+      d.report.dleft = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("D-PAD L is being pressed");
     break;
 
     case 'd':
-      d.report.ddown = HIGH;
-      Serial.println(chr);
+      d.report.dright = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("D-PAD R is being pressed");
+    break;
+
+    case 'm':
+      d.report.a = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("A is being pressed       ");
+    break;
+
+    case ':':
+      d.report.b = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("B is being pressed       ");
+    break;
+
+    case 'l':    
+      d.report.x = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("X is being pressed       ");
+    break;
+
+    case ';':
+      d.report.y = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("Y is being pressed       ");
+    break;
+
+    case 'p':
+      d.report.z = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("Z is being pressed       ");
+    break;
+
+    case '$':
+      d.report.r = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("R is being pressed       ");
+    break;
+
+    case 'a':
+      d.report.l = 1;
+      Term.SetCursPos(10, 10);
+      Serial.print("L is being pressed       ");
+    break;
+
+    case NULL:
+      d.report.a = 0;
+      d.report.b = 0;
+      d.report.x = 0;
+      d.report.y = 0;
+      d.report.z = 0;
+      d.report.start = 0;
+      d.report.r = 0;
+      d.report.l = 0;
+      d.report.dleft = 0;
+      d.report.dright = 0;
+      d.report.dup = 0;
+      d.report.ddown = 0;
+      d.report.xAxis = 128;
+      d.report.yAxis = 128;
+      Term.SetCursPos(10, 10);
+      Serial.print("                         ");
     break;
   }
-  GamecubeConsole.write(d);
-  ResetController();
-}
-
-void ResetController() {
-  d.report.a = LOW;
-  d.report.b = LOW;
-  d.report.x = LOW;
-  d.report.y = LOW;
-  d.report.z = LOW;
-  d.report.start = LOW;
-  d.report.r = LOW;
-  d.report.l = LOW;
-  d.report.dleft = LOW;
-  d.report.dright = LOW;
-  d.report.dup = LOW;
-  d.report.ddown = LOW;
-  d.report.xAxis = 128;
-  d.report.yAxis = 128;
+  if (!GamecubeConsole1.write(d))
+  {
+    Term.SetCursPos(20,20);
+    Serial.println(F("Error writing Gamecube controller."));
+    digitalWrite(pinLed, HIGH);
+    delay(1000);
+    ReadInput = false;
+  } else {
+    Term.SetCursPos(20,20);
+    Serial.println(F("   Connection established.        "));
+    ReadInput = true;
+    chr = NULL;
+  }
 }
