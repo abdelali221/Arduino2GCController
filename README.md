@@ -23,3 +23,7 @@ After downloading the ![Nintendo](https://github.com/NicoHood/Nintendo) library,
 - Dpad DOWN : "s"
 - Dpad LEFT : "q"
 - Dpad RIGHT : "d"
+
+# Credits :
+
+- The Nintendo library team (@NicoHood).
