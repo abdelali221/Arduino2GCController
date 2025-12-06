@@ -1,13 +1,33 @@
 #include <Nintendo.h>
 #include <ArduinoVT.h>
 
-Term Term;
+#define HANDSHAKE_SEND "A2GCC_HOST"
+#define HANDSHAKE_RECEIVE "A2GCC_AVR"
+
+#define pinLed LED_BUILTIN
+
 char chr;
 bool ReadInput = true;
-#define pinLed LED_BUILTIN
+
+Term Term;
+
 CGamecubeConsole GamecubeController1(6);
 CGamecubeConsole GamecubeConsole1(5);
 Gamecube_Data_t d = defaultGamecubeData;
+
+void StartHandshake() {
+  uint8_t c = 0;
+  char receive[sizeof(HANDSHAKE_SEND)];
+  while (1) {
+    if (Serial.available() && c < sizeof(HANDSHAKE_SEND)) {
+      receive[c++] = Serial.read();
+    }
+    if (c == sizeof(HANDSHAKE_SEND)) {
+      if (!strcmp(receive, HANDSHAKE_SEND)) return;
+      else exit(0);
+    }
+  }
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -17,6 +37,7 @@ void setup() {
   Serial.print("Arduino GC Controller Emulator");
   delay(1000);
   digitalWrite(pinLed, HIGH);
+  StartHandshake();
 }
 
 void loop() {
@@ -97,7 +118,7 @@ void loop() {
       Serial.print("L is being pressed       ");
     break;
 
-    case NULL:
+    case 0:
       d.report.a = 0;
       d.report.b = 0;
       d.report.x = 0;
@@ -127,6 +148,6 @@ void loop() {
     Term.SetCursPos(20,20);
     Serial.println(F("   Connection established.        "));
     ReadInput = true;
-    chr = NULL;
+    chr = 0;
   }
 }
