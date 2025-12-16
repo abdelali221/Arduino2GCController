@@ -6,14 +6,29 @@
 
 #define pinLed LED_BUILTIN
 
-char chr;
-bool ReadInput = true;
-
 Term Term;
 
-CGamecubeConsole GamecubeController1(6);
 CGamecubeConsole GamecubeConsole1(5);
 Gamecube_Data_t d = defaultGamecubeData;
+
+void HALT(uint8_t n) {
+  while(1) {
+    digitalWrite(pinLed, HIGH);
+    delay(1000);
+    digitalWrite(pinLed, LOW);
+    delay(1000);
+    for(int i = 0; i < n; i++) {
+      digitalWrite(pinLed, HIGH);
+      delay(200);
+      digitalWrite(pinLed, LOW);
+      delay(200);
+    }
+    digitalWrite(pinLed, HIGH);
+    delay(1000);
+    digitalWrite(pinLed, LOW);
+    delay(1000);
+  }
+}
 
 void StartHandshake() {
   uint8_t c = 0;
@@ -23,131 +38,97 @@ void StartHandshake() {
       receive[c++] = Serial.read();
     }
     if (c == sizeof(HANDSHAKE_SEND)) {
-      if (!strcmp(receive, HANDSHAKE_SEND)) return;
-      else exit(0);
+      if (!strcmp(receive, HANDSHAKE_SEND)) break;
+      else HALT(3);
     }
   }
+  Serial.print(HANDSHAKE_RECEIVE);
 }
 
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  Term.Clear();
+  Serial.begin(115200);
   pinMode(pinLed, OUTPUT);
-  Serial.print("Arduino GC Controller Emulator");
-  delay(1000);
   digitalWrite(pinLed, HIGH);
   StartHandshake();
 }
 
+char data1;
+char data2;
+char data3;
+char data4;
+char retstat = 0;
+bool ReadInput = true;
+
+void ResetController() {
+  d.report.a = 0;
+  d.report.b = 0;
+  d.report.x = 0;
+  d.report.y = 0;
+  d.report.z = 0;
+  d.report.start = 0;
+  d.report.r = 0;
+  d.report.l = 0;
+  d.report.dleft = 0;
+  d.report.dright = 0;
+  d.report.dup = 0;
+  d.report.ddown = 0;
+  d.report.xAxis = 128;
+  d.report.yAxis = 128;
+}
+
+void CheckParity() {
+  uint8_t onbits = 0;
+  for (int i = 0; i < 8; i++) {
+    if ((data1 << i) & 1) onbits++;
+  }
+  for (int i = 0; i < 4; i++) {
+    if ((data2 << i) & 1) onbits++;
+  }
+
+  if ((onbits % 2) == 0 && data2 & 8) {
+    return;
+  }
+  if ((onbits % 2) != 0 && !(data2 & 8)) {
+    return;
+  }
+  HALT(onbits);
+}
+
+void ReadData() {
+  d.report.a = data1 & 1;
+  d.report.b = data1 & 2;
+  d.report.x = data1 & 4;
+  d.report.y = data1 & 8;
+  d.report.z = data1 & 16;
+  d.report.start = data1 & 32;
+  d.report.r = data1 & 64;
+  d.report.l = data1 & 128;
+  d.report.dleft = data2 & 1;
+  d.report.dright = data2 & 2;
+  d.report.dup = data2 & 4;
+  d.report.ddown = data2 & 8;
+}
+
 void loop() {
-  if (Serial.available() && ReadInput) {
-    chr = Serial.read();
-  }
+  //Serial.write(64);
+  if (Serial.available()) {
+    data1 = Serial.read();
+    data2 = Serial.read();
+    data3 = Serial.read();
+    data4 = Serial.read();
+    //CheckParity();
+    Serial.write(data1);
+    Serial.write(data2);
+    Serial.write(data3);
+    Serial.write(data4);
+    ResetController();
+    ReadData();
+  }  
   
-  switch (chr) {
-    case ' ':
-      d.report.start = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("Start is being pressed     ");
-    break;
-    
-    case 'z':
-      d.report.dup = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("D-PAD U is being pressed");
-    break;
-
-    case 's':
-      d.report.ddown = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("D-PAD D is being pressed");
-    break;
-
-    case 'q':
-      d.report.dleft = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("D-PAD L is being pressed");
-    break;
-
-    case 'd':
-      d.report.dright = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("D-PAD R is being pressed");
-    break;
-
-    case 'm':
-      d.report.a = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("A is being pressed       ");
-    break;
-
-    case ':':
-      d.report.b = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("B is being pressed       ");
-    break;
-
-    case 'l':    
-      d.report.x = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("X is being pressed       ");
-    break;
-
-    case ';':
-      d.report.y = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("Y is being pressed       ");
-    break;
-
-    case 'p':
-      d.report.z = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("Z is being pressed       ");
-    break;
-
-    case '$':
-      d.report.r = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("R is being pressed       ");
-    break;
-
-    case 'a':
-      d.report.l = 1;
-      Term.SetCursPos(10, 10);
-      Serial.print("L is being pressed       ");
-    break;
-
-    case 0:
-      d.report.a = 0;
-      d.report.b = 0;
-      d.report.x = 0;
-      d.report.y = 0;
-      d.report.z = 0;
-      d.report.start = 0;
-      d.report.r = 0;
-      d.report.l = 0;
-      d.report.dleft = 0;
-      d.report.dright = 0;
-      d.report.dup = 0;
-      d.report.ddown = 0;
-      d.report.xAxis = 128;
-      d.report.yAxis = 128;
-      Term.SetCursPos(10, 10);
-      Serial.print("                         ");
-    break;
-  }
   if (!GamecubeConsole1.write(d))
   {
-    Term.SetCursPos(20,20);
-    Serial.println(F("Error writing Gamecube controller."));
     digitalWrite(pinLed, HIGH);
-    delay(1000);
-    ReadInput = false;
   } else {
-    Term.SetCursPos(20,20);
-    Serial.println(F("   Connection established.        "));
-    ReadInput = true;
-    chr = 0;
+    digitalWrite(pinLed, LOW);
   }
 }
