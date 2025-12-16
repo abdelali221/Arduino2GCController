@@ -1,5 +1,5 @@
 # Arduino2GCController
- A GC Controller emulator
+ A hardware GameCube Controller emulator.
 
 This app is still in developement, and I'm not responsible for any damage that it could cause.
 As long as you respect the wiring it should work with no problems.
@@ -10,20 +10,12 @@ After downloading the ![Nintendo](https://github.com/NicoHood/Nintendo) library,
 
 ![image](https://github.com/user-attachments/assets/a20d5952-a396-44a3-9d9d-678e26ae605e)
 
+
+
 # Control mapping : 
 
-- A : "m"
-- B : ":"
-- X : "l"
-- Y : ";"
-- Z : "p"
-- L : "a"
-- R : "$"
-- Dpad UP : "z"
-- Dpad DOWN : "s"
-- Dpad LEFT : "q"
-- Dpad RIGHT : "d"
+DirectInput controller support comming soon...
 
 # Credits :
 
-- The Nintendo library team (@NicoHood).
+- The ![Nintendo library](https://github.com/NicoHood/Nintendo) team.
